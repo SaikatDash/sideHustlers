@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+pocketledger.db
+pocketledger.db-shm
+pocketledger.db-wal
+.env
