@@ -1,5 +1,23 @@
+<div align="center">
+
 # PocketLedger
-**Your freelance money. Your machine.** PocketLedger turns paper receipts and digital invoices into a searchable, exportable expense ledger with open-weight AI running on your own computer.
+
+### Your freelance money. Your machine. ✨
+
+**A private, local-first expense and invoice desk powered by open-weight AI.**
+
+[![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2026-ff6f61?style=for-the-badge&logo=hacktoberfest&logoColor=white)](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)
+[![MLH](https://img.shields.io/badge/MLH-Open%20Source-111827?style=for-the-badge&logo=majorleaguehacking&logoColor=white)](https://mlh.io/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-83ac91?style=for-the-badge)](LICENSE)
+
+[**Try the live demo ↗**](https://saikatpocketledger.netlify.app) · [**Read the challenge submission ↗**](SUBMISSION.md)
+
+</div>
+
+> 🧾 **Capture → Review → Organize → Export**
+>
+> PocketLedger turns paper receipts and digital invoices into a searchable, exportable ledger while keeping your documents and data on your machine.
 
 ## The problem
 
@@ -13,6 +31,19 @@ The first customer is an independent freelancer who wants a fast receipt workflo
 
 ## What it does
 
+| | Workflow | What happens |
+|---|---|---|
+| 📸 | **Capture** | Add a receipt or invoice as an image, text, CSV, or Excel workbook. |
+| 🤖 | **Extract** | Ollama and Qwen2.5-VL create a structured local draft. |
+| ✅ | **Review** | Check and edit every field before saving anything. |
+| 👥 | **Organize** | Track clients, projects, categories, payment status, and deductions. |
+| 📊 | **Understand** | See monthly spending, category breakdowns, and invoice totals. |
+| 📤 | **Export** | Download a searchable CSV for your bookkeeper. |
+| 🔒 | **Stay private** | Keep data on your device with no hosted AI calls. |
+
+<details>
+<summary><strong>See the full feature set</strong> ▾</summary>
+
 - Extracts receipt details from JPG, PNG, or WEBP images, or pasted receipt text, using a local Ollama model.
 - Automatically analyzes an uploaded image and saves a draft, including uncertain results marked for review. Users can reopen the receipt and edit saved details.
 - Imports client invoices from invoice photos (JPG, PNG, WEBP), CSV files, and Excel workbooks (.xlsx). Ollama reads photos locally and can map unfamiliar spreadsheet column headings; invoice records are saved in PostgreSQL.
@@ -23,6 +54,8 @@ The first customer is an independent freelancer who wants a fast receipt workflo
 - Includes sign-up and sign-in stored in PostgreSQL, with a sample account for exploring the example ledger. Each local account sees its own expenses; no email or cloud account is needed.
 - Uses SQLite by default to keep your current ledger working. PostgreSQL is also supported through `DATABASE_URL`. Expense receipt images remain local files; invoice images are stored in the configured database with account ownership checks.
 - Works without Ollama for manual entry. Once Python, Ollama, and the model are installed, the app can run without an internet connection.
+
+</details>
 
 ## Run it
 
@@ -52,6 +85,8 @@ Use the included sample login to explore the example ledger:
 New accounts need a username and a password of at least 10 characters. Passwords are stored as one-way hashes in PostgreSQL, and each account sees only its own expenses. The sample account is available for exploring the example ledger. The first model run may take longer while Ollama loads it. The AI status panel shows whether Ollama and your selected model are ready. If they are unavailable, manual entry and the ledger still work.
 
 ### Live Deployed Link : https://saikatpocketledger.netlify.app
+
+> ⚠️ The live frontend is useful for exploring the interface. Local Python, Ollama, and PostgreSQL are required for the complete private workflow.
 
 ### Importing client invoices
 
@@ -119,11 +154,26 @@ Python · FastAPI · SQLAlchemy · SQLite / PostgreSQL · HTML · CSS · JavaScr
 
 ## Hacktoberfest
 
-PocketLedger is a new open-source AI project for the **Side Hustle** theme. The project focuses on a small workflow with a clear customer: freelancers who want private receipt capture and client-aware expense tracking without a recurring cloud inference fee. A useful next step is to put it in front of one freelancer, watch them log a real expense, and revise the workflow based on what slows them down.
+<div align="center">
+
+### 🏆 Built for the Hacktoberfest Open-Source AI Challenge
+
+**Side Hustle · Open Source · Local AI · Privacy by design**
+
+[![DEV Challenge](https://img.shields.io/badge/DEV%20Challenge-Side%20Hustle-3b49df?style=flat-square&logo=dev.to&logoColor=white)](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)
+[![MLH Community](https://img.shields.io/badge/MLH-Community-111827?style=flat-square&logo=majorleaguehacking&logoColor=white)](https://mlh.io/)
+
+</div>
+
+PocketLedger is an open-source AI project for the **Side Hustle** theme. It focuses on a clear customer: freelancers who want private receipt capture and client-aware expense tracking without a recurring cloud inference fee. A useful next step is to put it in front of one freelancer, watch them log a real expense, and revise the workflow based on what slows them down.
 
 The [Hacktoberfest Open-Source AI Challenge: Week 2](https://dev.to/challenges/hacktoberfest-week2-2026-10-12) closes **October 18, 2026 at 11:59 PM PDT** (October 19 at 12:29 PM IST) and asks participants to publish a project write-up on DEV with the `devchallenge` and `hf26challenge` tags.
 
 See [`SUBMISSION.md`](SUBMISSION.md) for a draft project write-up to adapt after trying the app.
+
+### Search tags
+
+`mlh` · `hacktoberfest` · `open-source-ai` · `side-hustle` · `local-ai` · `ollama` · `privacy`
 
 ## Contributing
 
