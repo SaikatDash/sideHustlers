@@ -1,5 +1,4 @@
 # PocketLedger
-
 **Your freelance money. Your machine.** PocketLedger turns paper receipts and digital invoices into a searchable, exportable expense ledger with open-weight AI running on your own computer.
 
 ## The problem
@@ -51,6 +50,8 @@ Use the included sample login to explore the example ledger:
 | `demo@pocketledger.local` | `PocketLedger2026!` |
 
 New accounts need a username and a password of at least 10 characters. Passwords are stored as one-way hashes in PostgreSQL, and each account sees only its own expenses. The sample account is available for exploring the example ledger. The first model run may take longer while Ollama loads it. The AI status panel shows whether Ollama and your selected model are ready. If they are unavailable, manual entry and the ledger still work.
+
+### Live Deployed Link : https://saikatpocketledger.netlify.app
 
 ### Importing client invoices
 
