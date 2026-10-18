@@ -15,15 +15,19 @@ The first customer is an independent freelancer who wants a fast receipt workflo
 ## What it does
 
 - Extracts receipt details from JPG, PNG, or WEBP images, or pasted receipt text, using a local Ollama model.
-- Shows the AI draft in an editable review form; nothing is added to the ledger until the user saves it.
+- Automatically analyzes an uploaded image and saves a draft, including uncertain results marked for review. Users can reopen the receipt and edit saved details.
+- Imports client invoices from invoice photos (JPG, PNG, WEBP), CSV files, and Excel workbooks (.xlsx). Ollama reads photos locally and can map unfamiliar spreadsheet column headings; invoice records are saved in PostgreSQL.
+- Shows each client's billed and paid totals, outstanding balances, and invoice list. Open an invoice to see the extracted details and original image, or remove an imported record.
 - Records category, currency, client or project, and a user-controlled business-deductible flag.
 - Provides a searchable ledger, monthly spending view, category breakdown, and CSV export.
-- Stores structured records in SQLite on the current device. Receipt images are processed in memory and discarded after extraction.
-- Works without Ollama for manual expense entry. Once Python, Ollama, and the model are installed, the app can run without an internet connection.
+- Click any expense to review all saved details and its receipt image when one was kept.
+- Includes sign-up and sign-in stored in PostgreSQL, with a sample account for exploring the example ledger. Each local account sees its own expenses; no email or cloud account is needed.
+- Uses SQLite by default to keep your current ledger working. PostgreSQL is also supported through `DATABASE_URL`. Expense receipt images remain local files; invoice images are stored in the configured database with account ownership checks.
+- Works without Ollama for manual entry. Once Python, Ollama, and the model are installed, the app can run without an internet connection.
 
 ## Run it
 
-Requirements: Python 3.10 or newer and [Ollama 0.7.0 or newer](https://ollama.com/download). The default `qwen2.5vl:3b` vision model is about 3.2 GB to download. The web app uses only Python's standard library; there is no `pip install` step.
+Requirements: Python 3.10 or newer and [Ollama](https://ollama.com/download). The default `qwen2.5vl:3b` vision model is about 3.2 GB to download.
 
 1. Install Ollama, start it, and download a vision model once:
 
@@ -31,15 +35,38 @@ Requirements: Python 3.10 or newer and [Ollama 0.7.0 or newer](https://ollama.co
    ollama pull qwen2.5vl:3b
    ```
 
-2. From this folder, start PocketLedger:
+2. Install the app packages and start PocketLedger:
 
    ```sh
+   python -m pip install -r requirements.txt
    python main.py
    ```
 
-3. Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+3. Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Do not open `index.html` with VS Code Live Server; its static preview cannot handle sign-in, AI, or database requests.
 
-The first model run may take longer while Ollama loads it. The AI status at the top of the page shows whether Ollama and the selected model are ready. If they are unavailable, manual entry and the local ledger still work.
+Use the included sample login to explore the example ledger:
+
+| Username | Password |
+| --- | --- |
+| `demo@pocketledger.local` | `PocketLedger2026!` |
+
+New accounts need a username and a password of at least 10 characters. Passwords are stored as one-way hashes in PostgreSQL, and each account sees only its own expenses. The sample account is available for exploring the example ledger. The first model run may take longer while Ollama loads it. The AI status panel shows whether Ollama and your selected model are ready. If they are unavailable, manual entry and the ledger still work.
+
+### Importing client invoices
+
+Open **Client invoices** in the sidebar and choose a JPG, PNG, WEBP, CSV, or `.xlsx` file. PDF upload is not supported yet; export a PDF's table to CSV/Excel or save a page as an image. For spreadsheets, use one invoice per row, with **Client** and **Amount** as the required headers. Invoice Number, Invoice Date, Due Date, Currency, Status, and Description are helpful optional headers. The right-side **Ask PocketLedger** chat answers questions about workflows, column names, and common import errors. An image is read by your local Ollama vision model. For spreadsheets, PocketLedger detects common header names, CSV delimiters, and header rows even when the file includes a title line. Ollama can map less familiar headings; if the client and amount columns are still unclear, choose them from a simple column picker. Download the sample CSV from the invoice screen to get a ready-to-fill format. Imports are limited to 500 rows and 10 MB per file. Duplicate client/invoice-number pairs and rows with invalid amounts are reported; rows with no client name are saved as **Needs review** so they remain visible. The client dashboard includes billed, paid, due, and overdue totals plus a payment progress chart. Review extracted invoice values yourself; local AI can misread unclear documents. Currency totals are kept separate rather than converted.
+
+The **Ask PocketLedger** help chat retrieves relevant notes about the app and uses the configured Ollama model to answer questions such as how to add an expense or why a CSV import failed. It requires a signed-in account and a running local model. Questions are not stored; each answer shows which help notes it used.
+
+### Optional PostgreSQL setup
+
+The app uses your existing `pocketledger.db` automatically unless `DATABASE_URL` is set. To use PostgreSQL, start Docker Desktop, then run `docker compose up -d` from this folder. Copy `.env.example` to `.env` and uncomment the local connection line:
+
+```env
+DATABASE_URL=postgresql+psycopg://pocketledger:pocketledger-local@127.0.0.1:5433/pocketledger
+```
+
+Restart PocketLedger to connect. PostgreSQL runs inside a Docker container, but its files are stored in Docker's named volume on this same computer. When the PostgreSQL database is empty, the app copies the existing local sample ledger into PostgreSQL and creates the sample login above. Keep the PostgreSQL port restricted to your own device. If you use an already-running PostgreSQL server, set `DATABASE_URL` in `.env` to its database, user, and password instead.
 
 ### Settings
 
@@ -49,7 +76,7 @@ Set environment variables before starting the app to change its local configurat
 | --- | --- | --- |
 | `OLLAMA_MODEL` | `qwen2.5vl:3b` | Ollama vision model tag |
 | `OLLAMA_URL` | `http://127.0.0.1:11434` | Ollama address; keep it on loopback for local use |
-| `POCKETLEDGER_DB` | `./pocketledger.db` | Local SQLite database path |
+| `DATABASE_URL` | Local `pocketledger.db` | SQLAlchemy URL; set to `postgresql+psycopg://...` to use PostgreSQL |
 | `PORT` | `8000` | Local web app port |
 
 For example, in PowerShell you can set `$env:OLLAMA_MODEL = "your-vision-model"` before `python main.py`. Choose an Ollama model that supports both image input and JSON-schema output.
@@ -59,34 +86,35 @@ For example, in PowerShell you can set `$env:OLLAMA_MODEL = "your-vision-model"`
 ```mermaid
 flowchart LR
     A[Receipt image or pasted text] --> B[Browser on your device]
-    B -->|Local request| C[PocketLedger · Python standard library]
+    B -->|Local request| C[PocketLedger · FastAPI]
     C -->|JSON schema + optional image| D[Ollama · open-weight vision model]
     D -->|Structured extraction draft| C
     C --> B
-    B -->|User reviews and saves| E[(SQLite on this device)]
+    B -->|Saved draft · review any time| E[(SQLite or PostgreSQL)]
     E -->|Search, summary, CSV| B
 ```
 
-The app binds to `127.0.0.1`, sends inference requests only to the configured Ollama endpoint, and does not call a hosted AI API. Ollama receives the image only for the extraction request. PocketLedger does not save the original image. Structured fields are returned to the form and persisted only when the user chooses **Save expense**.
+The app binds to `127.0.0.1`, sends inference requests only to the configured Ollama endpoint, and does not call a hosted AI API. Ollama receives the image only for the extraction request. The user can choose to retain expense images in a local `receipts/` folder; imported invoice images are stored in the configured database (by default the local PostgreSQL container). Opening a record shows its details and retained image.
 
 ## Why open innovation matters here
 
-Receipt images reveal spending habits, vendors, dates, and sometimes addresses or partial payment information. A closed cloud model would require sending those details to an outside service and could add a fee to every scan. With an open-weight model served locally by Ollama, the private extraction step stays on the freelancer's computer, and after the model download the workflow can run offline. There is no per-token bill or vendor lock-in: users can choose another compatible vision model, change the prompt, or adapt the schema to their bookkeeping needs.
+Receipt images reveal spending habits, vendors, dates, and sometimes addresses or partial payment information. A closed cloud model would require sending those details to an outside service and could add a fee to every scan. With an open-weight model served locally by Ollama, the private extraction step stays on the freelancer's computer, and after the model download the workflow can run offline. The user decides whether to retain each receipt image locally for later reference. There is no per-token bill or vendor lock-in: users can choose another compatible vision model, change the prompt, or adapt the schema to their bookkeeping needs.
 
 The open approach works especially well for this narrow task: read a short business document and draft a small, predictable set of fields. The model does not decide tax treatment or silently book anything. People review its suggestions, correct mistakes, and remain responsible for whether an expense is deductible.
 
 ## Privacy and practical limits
 
-- This is a local desktop utility, not a hosted multi-user service. Keep it bound to `127.0.0.1` and do not expose its port to a public network.
+- This is a local utility, not a hosted multi-user service. Accounts and expenses are stored on this computer. Keep it bound to `127.0.0.1` and do not expose its port to a public network. Password recovery is not available because accounts do not use email.
+- Kept receipt images live in the local `receipts/` folder and are not encrypted. They are ignored by Git; use device encryption and account protections, and include the folder in backups only if you want receipt copies backed up too.
 - Install Python, Ollama, and the chosen model before expecting the app to work fully offline. Model downloads need internet access once.
 - Extraction quality depends on the model, image quality, handwriting, and receipt layout. Review the merchant, date, currency, and total before saving.
 - Currency totals are never converted. The overview charts one currency at a time; each ledger row retains its original currency.
 - The deductible marker is a personal bookkeeping aid, not tax advice or an automatic tax determination.
-- PocketLedger does not encrypt the local SQLite file. Use your device's disk encryption and account protections if the data is sensitive.
+- PocketLedger does not encrypt its database or receipt files. Use your device's disk encryption and account protections if the data is sensitive.
 
 ## Built with
 
-Python standard library · SQLite · HTML · CSS · JavaScript · Ollama · Qwen2.5-VL (default model)
+Python · FastAPI · SQLAlchemy · SQLite / PostgreSQL · HTML · CSS · JavaScript · Ollama · Qwen2.5-VL (default model)
 
 ## Hacktoberfest
 

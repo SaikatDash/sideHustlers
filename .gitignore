@@ -5,4 +5,10 @@ venv/
 pocketledger.db
 pocketledger.db-shm
 pocketledger.db-wal
+receipts/
 .env
+.session_secret
+.pg-admin-password
+.pg-init-passfile
+.pocketledger-pgdata/
+.pocketledger-postgres.log
