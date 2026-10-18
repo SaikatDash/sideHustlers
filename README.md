@@ -11,7 +11,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-83ac91?style=for-the-badge)](LICENSE)
 
-[**Try the live demo ↗**](https://saikatpocketledger.netlify.app) · [**Read the challenge submission ↗**](SUBMISSION.md)
+[**Try the live demo ↗**](https://saikatpocketledger.netlify.app)
 
 </div>
 
